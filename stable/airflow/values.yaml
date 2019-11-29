@@ -62,7 +62,7 @@ airflow:
   image:
     ##
     ## docker-airflow image
-    repository: marclambertiml/airflow
+    repository: airflow
     ##
     ## image tag
     tag: latest
@@ -346,7 +346,7 @@ ingress:
     path: ""
     ##
     ## hostname for the webserver
-    host: ""
+    host: "localhost"
     ##
     ## Annotations for the webserver
     ## Airflow webserver handles relative path completely, just let your load balancer give the HTTP
