@@ -87,7 +87,7 @@ spec:
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
           ports:
             - name: web
-              containerPort: 8080
+              containerPort: 80
               protocol: TCP
           envFrom:
             - configMapRef:

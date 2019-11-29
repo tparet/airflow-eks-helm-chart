@@ -41,7 +41,7 @@ airflow:
   service:
     annotations: {}
     type: ClusterIP
-    externalPort: 8080
+    externalPort: 80
     nodePort:
       http:
   ##
