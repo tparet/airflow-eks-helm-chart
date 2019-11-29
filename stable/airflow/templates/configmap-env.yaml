@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ template "airflow.fullname" . }}-env"
+  labels:
+    app: {{ template "airflow.name" . }}
+    chart: {{ template "airflow.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  ## Force UTC timezone
+  TZ: Etc/UTC
+  ## Kubernetes
+  AIRFLOW_DEPS: "kubernetes"
+  AIRFLOW__CORE__EXECUTOR: "KubernetesExecutor"
+  AIRFLOW__KUBERNETES__GIT_REPO: "{{ .Values.dags.git.url }}"
+  AIRFLOW__KUBERNETES__GIT_BRANCH: "{{ .Values.dags.git.ref }}"
+  AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "{{ .Values.dags.path }}"
+  AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: "{{ .Values.airflow.image.repository }}"
+  AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: "{{ .Values.airflow.image.tag }}"
+  AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY: "{{ .Values.airflow.image.pull_policy }}"
+  AIRFLOW__KUBERNETES__WORKER_DAGS_FOLDER: "{{ .Values.dags.path }}"
+  AIRFLOW__KUBERNETES__AIRFLOW_CONFIGMAP: "{{ template "airflow.fullname" . }}-env"
+  AIRFLOW__KUBERNETES__NAMESPACE: "{{ .Release.Namespace }}"
+  ## Postgres DB configuration
+  POSTGRES_HOST: "{{ template "airflow.postgresql.fullname" . }}"
+  POSTGRES_PORT: "{{ .Values.postgresql.service.port }}"
+  POSTGRES_DB: "{{ .Values.postgresql.postgresDatabase }}"
+  ## Redis DB configuration
+  REDIS_HOST: "{{ template "airflow.redis.host" . }}"
+  REDIS_PORT: "{{ .Values.redis.master.port }}"
+  ## Flower PORT
+  FLOWER_PORT: "5555"
+  # Configure puckel's docker-airflow entrypoint
+  EXECUTOR: "{{ .Values.airflow.executor }}"
+  FERNET_KEY: "{{ .Values.airflow.fernetKey }}"
+  DO_WAIT_INITDB: "false"
+  ## Custom Airflow settings
+  AIRFLOW__CORE__DONOT_PICKLE: "{{ .Values.dags.doNotPickle }}"
+  AIRFLOW__CELERY__FLOWER_URL_PREFIX: "{{ .Values.ingress.flower.path }}"
+  AIRFLOW__CELERY__WORKER_CONCURRENCY: "{{ .Values.workers.celery.instances }}"
+  AIRFLOW__CORE__DAGS_FOLDER: "{{ .Values.dags.path }}"
+  AIRFLOW__CORE__BASE_LOG_FOLDER: "{{ .Values.logs.path }}"
+  AIRFLOW__CORE__DAG_PROCESSOR_MANAGER_LOG_LOCATION: "{{ printf "%s/%s" .Values.logs.path "dag_processor_manager/dag_processor_manager.log" }}"
+  AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY: "{{ printf "%s/%s" .Values.logs.path "scheduler" }}"
+  AIRFLOW__WEBSERVER__BASE_URL: "http://localhost:8080{{ .Values.ingress.web.path }}"
+  # Disabling XCom pickling for forward compatibility
+  AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "false"
+  # For backwards compat with AF < 1.10, CELERY_CONCURRENCY got renamed to WORKER_CONCURRENCY
+  AIRFLOW__CELERY__CELERY_CONCURRENCY: "{{ .Values.workers.celery.instances }}"
+  # Note: changing `Values.airflow.config` won't change the configmap checksum and so won't make
+  # the pods to restart
+  {{- range $setting, $option := .Values.airflow.config }}
+  {{ $setting }}: "{{ $option }}"
+  {{- end }}
