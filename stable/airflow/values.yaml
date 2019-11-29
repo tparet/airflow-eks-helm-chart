@@ -62,7 +62,7 @@ airflow:
   image:
     ##
     ## docker-airflow image
-    repository: airflow
+    repository: apache/airflow
     ##
     ## image tag
     tag: latest
