@@ -62,10 +62,10 @@ airflow:
   image:
     ##
     ## docker-airflow image
-    repository: apache/airflow
+    repository: stibbons31/docker-airflow-dev
     ##
     ## image tag
-    tag: latest
+    tag: 2.0dev
     ##
     ## Image pull policy
     ## values: Always or IfNotPresent
@@ -346,7 +346,7 @@ ingress:
     path: ""
     ##
     ## hostname for the webserver
-    host: "localhost"
+    host: ""
     ##
     ## Annotations for the webserver
     ## Airflow webserver handles relative path completely, just let your load balancer give the HTTP
